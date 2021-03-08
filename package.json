@@ -27,14 +27,14 @@
     "README.md"
   ],
   "scripts": {
-    "prebuild": "prebuildify --napi --strip --tag-libc -t 10.0.0",
-    "format": "prettier --write \"./**/*.{js,json,md}\"",
-    "install": "node-gyp-build",
-    "rebuild": "node-gyp rebuild -j 8 --debug --verbose",
-    "test": "mocha"
+    "build": "napi build --platform",
+    "build-release": "napi build --platform --release"
+  },
+  "napi": {
+    "name": "parcel-watcher"
   },
   "engines": {
-    "node": ">= 10.0.0"
+    "node": ">= 12.0.0"
   },
   "husky": {
     "hooks": {
@@ -48,20 +48,14 @@
     ]
   },
   "dependencies": {
-    "node-addon-api": "^3.0.2",
-    "node-gyp-build": "^4.2.3"
+    "detect-libc": "^1.0.3"
   },
   "devDependencies": {
+    "@napi-rs/cli": "^1.0.3",
     "fs-extra": "^9.0.1",
     "husky": "^4.3.0",
-    "mocha": "^8.2.1",
-    "prebuildify": "^4.1.0",
     "lint-staged": "^10.5.1",
+    "mocha": "^8.2.1",
     "prettier": "^2.1.2"
-  },
-  "binary": {
-    "napi_versions": [
-      3
-    ]
   }
 }

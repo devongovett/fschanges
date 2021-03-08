@@ -7,3 +7,5 @@ token.txt
 .idea
 stress-test
 crash.log
+target
+*.node
