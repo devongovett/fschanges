@@ -11,4 +11,4 @@ if (process.platform === 'linux') {
 } else if (process.platform === 'win32') {
   parts.push('msvc');
 }
-module.exports = require(`./fs-search.${parts.join('-')}.node`);
+module.exports = require(`./parcel-watcher.${parts.join('-')}.node`);

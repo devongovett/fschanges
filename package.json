@@ -28,7 +28,9 @@
   ],
   "scripts": {
     "build": "napi build --platform",
-    "build-release": "napi build --platform --release"
+    "build-release": "napi build --platform --release",
+    "format": "prettier --write \"./**/*.{js,json,md}\"",
+    "test": "mocha"
   },
   "napi": {
     "name": "parcel-watcher"
