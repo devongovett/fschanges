@@ -5,8 +5,10 @@ extern crate napi_derive;
 pub mod error;
 pub mod watcher;
 
-use napi::{CallContext, JsFunction, JsNull, JsObject, JsString, JsUndefined, Property, Result, Env};
-use watcher::ParcelWatcher;
+use napi::{
+    CallContext, Env, JsFunction, JsNull, JsObject, JsString, JsUndefined, Property, Ref, Result,
+};
+use watcher::{ParcelWatcher, ParcelWatcherEvent};
 
 #[js_function(3)]
 fn subscribe(ctx: CallContext) -> Result<JsNull> {
@@ -16,8 +18,12 @@ fn subscribe(ctx: CallContext) -> Result<JsNull> {
 
     let this: JsObject = ctx.this_unchecked();
     let parcel_watcher: &mut ParcelWatcher = ctx.env.unwrap(&this)?;
-
-    parcel_watcher.watch(directory_to_watch?.into_utf8()?.as_str()?)?;
+    // TODO: Figure out how to get a function to be available after this function ends...
+    // There's threadsafefunction but apparently that doesn't exist
+    // and just passing the function returns in a segmentation fault so pretty sure the function ref gets destroyed...
+    // Kinda don't know how to handle this at this point... :( was so close to getting a Proof of Concept...
+    let callback_fn_ref: Ref<JsFunction> = None;
+    parcel_watcher.watch(directory_to_watch?.into_utf8()?.as_str()?, callback_fn_ref)?;
 
     return ctx.env.get_null();
 }

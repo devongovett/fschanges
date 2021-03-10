@@ -2,6 +2,7 @@ extern crate notify;
 
 use self::notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Watcher as NotifyWatcher};
 use error::ParcelWatcherError;
+use napi::{JsFunction, Ref};
 use std::path::PathBuf;
 use std::result::Result;
 use std::sync::mpsc::{channel, Receiver};
@@ -19,12 +20,10 @@ pub struct ParcelWatcherEvent {
     path: String,
 }
 
-type WatcherCallback = fn(ParcelWatcherEvent) -> ();
-
 pub struct ParcelWatcher {
     notify_receiver: Receiver<DebouncedEvent>,
     notify_watcher: RecommendedWatcher,
-    callbacks: Vec<WatcherCallback>,
+    callbacks: Vec<Ref<JsFunction>>,
 }
 
 impl ParcelWatcher {
@@ -51,7 +50,10 @@ impl ParcelWatcher {
                 println!("{:?}", event);
 
                 for callback in self.callbacks.iter() {
-                    callback(event.clone());
+                    match callback.call(None, &[]) {
+                        Ok(_v) => {}
+                        Err(_e) => {}
+                    }
                 }
             }
             None => {}
@@ -80,9 +82,15 @@ impl ParcelWatcher {
         }
     }
 
-    pub fn watch(&mut self, directory_to_watch: &str) -> Result<(), ParcelWatcherError> {
+    pub fn watch(
+        &mut self,
+        directory_to_watch: &str,
+        callback: Ref<JsFunction>,
+    ) -> Result<(), ParcelWatcherError> {
         self.notify_watcher
             .watch(directory_to_watch, RecursiveMode::Recursive)?;
+
+        self.callbacks.push(callback);
 
         return Ok(());
     }
