@@ -12,18 +12,27 @@ function normalizeOptions(dir, opts = {}) {
 }
 
 async function run() {
+  console.log(binding.ParcelWatcher);
+  const watcherInstance = new binding.ParcelWatcher();
+  console.log(watcherInstance);
+
   let dir = path.resolve('.');
   let opts = normalizeOptions(dir, {});
   let callback = (...params) => {
     console.log(params);
   };
-  await binding.subscribe(dir, callback, opts);
 
-  return {
-    unsubscribe() {
-      return binding.unsubscribe(dir, callback, opts);
-    },
-  };
+  setInterval(() => {
+    watcherInstance.process_events();
+  }, 100);
+
+  await watcherInstance.subscribe(dir, callback, opts);
+
+  //   return {
+  //     unsubscribe() {
+  //       return watcherInstance.unsubscribe(dir, callback, opts);
+  //     },
+  //   };
 }
 
 run().catch((err) => console.error(err));
