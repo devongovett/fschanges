@@ -5,28 +5,8 @@ extern crate napi_derive;
 pub mod error;
 pub mod watcher;
 
-use napi::{CallContext, JsFunction, JsNull, JsObject, JsString, JsUndefined, Property, Result};
+use napi::{CallContext, JsFunction, JsNull, JsObject, JsString, JsUndefined, Property, Result, Env};
 use watcher::ParcelWatcher;
-
-#[js_function]
-fn watcher_class_contructor(ctx: CallContext) -> Result<JsUndefined> {
-    let mut this: JsObject = ctx.this_unchecked();
-    ctx.env.wrap(&mut this, ParcelWatcher::new()?)?;
-    //   this.set_named_property("count", ctx.env.create_int32(count)?)?;
-    return ctx.env.get_undefined();
-}
-
-#[js_function(1)]
-fn new_watcher_class(ctx: CallContext) -> Result<JsFunction> {
-    let subscribe_method = Property::new(&ctx.env, "subscribe")?.with_method(subscribe);
-    let process_events_method = Property::new(&ctx.env, "process_events")?.with_method(process_events);
-    let properties = vec![subscribe_method, process_events_method];
-    return ctx.env.define_class(
-        "ParcelWatcher",
-        watcher_class_contructor,
-        properties.as_slice(),
-    );
-}
 
 #[js_function(3)]
 fn subscribe(ctx: CallContext) -> Result<JsNull> {
@@ -52,8 +32,23 @@ fn process_events(ctx: CallContext) -> Result<JsUndefined> {
     return ctx.env.get_undefined();
 }
 
+#[js_function]
+fn watcher_class_contructor(ctx: CallContext) -> Result<JsUndefined> {
+    let mut this: JsObject = ctx.this_unchecked();
+    ctx.env.wrap(&mut this, ParcelWatcher::new()?)?;
+    //   this.set_named_property("count", ctx.env.create_int32(count)?)?;
+    return ctx.env.get_undefined();
+}
+
 #[module_exports]
-fn init(mut exports: JsObject) -> Result<()> {
-    exports.create_named_method("ParcelWatcher", watcher_class_contructor)?;
+fn init(mut exports: JsObject, env: Env) -> Result<()> {
+    let subscribe_method = Property::new(&env, "subscribe")?.with_method(subscribe);
+    let process_events_method = Property::new(&env, "process_events")?.with_method(process_events);
+    let watcher_class = env.define_class(
+        "ParcelWatcher",
+        watcher_class_contructor,
+        &[subscribe_method, process_events_method],
+    )?;
+    exports.set_named_property("ParcelWatcher", watcher_class)?;
     return Ok(());
 }
